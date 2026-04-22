@@ -2,6 +2,7 @@ from langgraph.graph import StateGraph, MessagesState, START
 from langchain.chat_models import init_chat_model
 from langgraph.prebuilt.tool_node import ToolNode, tools_condition
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_openai import ChatOpenAI
 
 from dotenv import load_dotenv
 import os
@@ -21,7 +22,14 @@ _MAX_HISTORY_MESSAGES = 20  # sliding window for memory management
 
 tools = [get_anime_details, semantic_anime_search, query_anime_database]
 
-_model = init_chat_model("openai:gpt-4o-mini", temperature=0.7)
+_GATEWAY_URL = "https://k7uffyg03f.execute-api.us-east-1.amazonaws.com/prod/openai/v1"
+_model = ChatOpenAI(
+    model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+    temperature=0.7,
+    openai_api_key="any_value",
+    openai_api_base=_GATEWAY_URL,
+    default_headers={"x-api-key": os.getenv("API_GATEWAY_KEY", "")},
+)
 
 
 def call_model(state: MessagesState):
